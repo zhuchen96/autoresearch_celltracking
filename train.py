@@ -242,7 +242,7 @@ FOCAL_ALPHA = 0.75
 FOCAL_GAMMA = 2.0
 
 # Model size
-BASE = 32
+BASE = 64
 
 # Augmentation
 USE_AUGMENTATION = True
