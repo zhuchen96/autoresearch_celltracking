@@ -233,7 +233,7 @@ BATCH_SIZE = 8
 TRAIN_SECONDS = 300  # 5-minute wall clock budget (excluding startup/eval)
 LR = 1e-3
 WEIGHT_DECAY = 1e-4
-AMP = False
+AMP = True
 NUM_WORKERS = 0
 
 # Training loss choice (free to optimize)
