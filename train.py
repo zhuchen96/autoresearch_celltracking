@@ -93,14 +93,15 @@ class UNetConfig:
 
 
 class ConvBlock(nn.Module):
-    def __init__(self, in_ch, out_ch):
+    def __init__(self, in_ch, out_ch, groups=8):
         super().__init__()
+        g = min(groups, out_ch)
         self.net = nn.Sequential(
             nn.Conv2d(in_ch, out_ch, 3, padding=1),
-            nn.BatchNorm2d(out_ch),
+            nn.GroupNorm(g, out_ch),
             nn.ReLU(inplace=True),
             nn.Conv2d(out_ch, out_ch, 3, padding=1),
-            nn.BatchNorm2d(out_ch),
+            nn.GroupNorm(g, out_ch),
             nn.ReLU(inplace=True),
         )
 
