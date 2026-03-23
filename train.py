@@ -230,7 +230,7 @@ POS_OVERSAMPLE = 3
 
 # Optimization
 BATCH_SIZE = 8
-EPOCHS = 30
+TRAIN_SECONDS = 300  # 5-minute wall clock budget (excluding startup/eval)
 LR = 1e-3
 WEIGHT_DECAY = 1e-4
 AMP = False
@@ -368,14 +368,20 @@ print("---")
 
 os.makedirs(OUT_DIR, exist_ok=True)
 
+final_val_metric = float("nan")
 best_val_metric = float("inf")
 best_epoch = 0
-best_state = None
-final_val_metric = float("nan")
+epochs_completed = 0
 
 t_start_training = time.time()
 
-for epoch in range(1, EPOCHS + 1):
+epoch = 0
+while True:
+    elapsed = time.time() - t_start_training
+    if elapsed >= TRAIN_SECONDS:
+        break
+
+    epoch += 1
     t0 = time.time()
 
     train_loss, seen_samples = train_epoch(
@@ -383,48 +389,36 @@ for epoch in range(1, EPOCHS + 1):
     )
     val_metric = evaluate_fixed_metric(model, val_loader, device)
     final_val_metric = val_metric
+    epochs_completed = epoch
 
     if device.type == "cuda":
         peak_vram_mb = max(peak_vram_mb, torch.cuda.max_memory_allocated() / 1024 / 1024)
 
     dt = time.time() - t0
     samples_per_sec = seen_samples / max(dt, 1e-6)
+    elapsed_total = time.time() - t_start_training
 
     torch.save(
-        {
-            "epoch": epoch,
-            "model": model.state_dict(),
-            "best_val_metric": best_val_metric,
-        },
+        {"epoch": epoch, "model": model.state_dict()},
         os.path.join(OUT_DIR, "last.pt"),
     )
 
-    improved = val_metric < best_val_metric
-    if improved:
+    if val_metric < best_val_metric:
         best_val_metric = val_metric
         best_epoch = epoch
-        best_state = copy.deepcopy(model.state_dict())
         torch.save(
-            {
-                "epoch": epoch,
-                "model": model.state_dict(),
-                "best_val_metric": best_val_metric,
-            },
+            {"epoch": epoch, "model": copy.deepcopy(model.state_dict())},
             os.path.join(OUT_DIR, "best.pt"),
         )
 
     print(
-        f"epoch {epoch:03d}/{EPOCHS:03d} | "
+        f"epoch {epoch:03d} | "
         f"train_loss: {train_loss:.6f} | "
         f"val_metric: {val_metric:.6f} | "
-        f"best: {best_val_metric:.6f} | "
+        f"elapsed: {elapsed_total:.1f}s/{TRAIN_SECONDS}s | "
         f"dt: {dt:.1f}s | "
         f"samples/sec: {samples_per_sec:.1f}"
-        + (" | saved best" if improved else "")
     )
-
-if best_state is not None:
-    model.load_state_dict(best_state)
 
 training_seconds = time.time() - t_start_training
 total_seconds = time.time() - t_start
@@ -435,14 +429,12 @@ total_seconds = time.time() - t_start
 # ---------------------------------------------------------------------------
 
 print("---")
-print(f"best_val_metric:   {best_val_metric:.6f}")
-print(f"best_epoch:        {best_epoch}")
 print(f"final_val_metric:  {final_val_metric:.6f}")
+print(f"epochs_completed:  {epochs_completed}")
 print(f"training_seconds:  {training_seconds:.1f}")
 print(f"total_seconds:     {total_seconds:.1f}")
 print(f"peak_vram_mb:      {peak_vram_mb:.1f}")
 print(f"num_params_M:      {num_params / 1e6:.3f}")
-print(f"epochs:            {EPOCHS}")
 print(f"batch_size:        {BATCH_SIZE}")
 print(f"patch:             {PATCH}")
 print(f"temporal:          {TEMPORAL}")
