@@ -231,7 +231,7 @@ POS_OVERSAMPLE = 3
 # Optimization
 BATCH_SIZE = 8
 EPOCHS = 30
-LR = 3e-4
+LR = 1e-3
 WEIGHT_DECAY = 1e-4
 AMP = False
 NUM_WORKERS = 0
