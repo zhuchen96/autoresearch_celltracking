@@ -232,7 +232,7 @@ POS_OVERSAMPLE = 3
 BATCH_SIZE = 8
 TRAIN_SECONDS = 300  # 5-minute wall clock budget (excluding startup/eval)
 LR = 2e-3
-WEIGHT_DECAY = 1e-4
+WEIGHT_DECAY = 1e-5
 AMP = True
 NUM_WORKERS = 0
 
