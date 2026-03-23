@@ -346,6 +346,7 @@ if INIT_CKPT is not None:
 
 train_loss_fn = FocalLoss(alpha=FOCAL_ALPHA, gamma=FOCAL_GAMMA) if USE_FOCAL else nn.BCEWithLogitsLoss()
 optimizer = torch.optim.AdamW(model.parameters(), lr=LR, weight_decay=WEIGHT_DECAY)
+scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=200, eta_min=LR * 0.01)
 scaler = torch.cuda.amp.GradScaler(enabled=(device.type == "cuda" and AMP))
 
 num_params = count_parameters(model)
@@ -402,6 +403,8 @@ while True:
         {"epoch": epoch, "model": model.state_dict()},
         os.path.join(OUT_DIR, "last.pt"),
     )
+
+    scheduler.step()
 
     if val_metric < best_val_metric:
         best_val_metric = val_metric
