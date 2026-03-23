@@ -198,6 +198,8 @@ def train_epoch(model, loader, loss_fn, optimizer, scaler, device, amp):
             loss = loss_fn(logits, y)
 
         scaler.scale(loss).backward()
+        scaler.unscale_(optimizer)
+        torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
         scaler.step(optimizer)
         scaler.update()
 
