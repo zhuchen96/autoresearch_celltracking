@@ -93,7 +93,7 @@ class UNetConfig:
 
 
 class ConvBlock(nn.Module):
-    def __init__(self, in_ch, out_ch, groups=8):
+    def __init__(self, in_ch, out_ch, groups=16):
         super().__init__()
         g = min(groups, out_ch)
         self.net = nn.Sequential(
