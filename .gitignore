@@ -21,3 +21,8 @@ dev/
 
 # Results file
 results.tsv
+output/
+*labels/
+*nuc_data/
+.idea/
+*.log
