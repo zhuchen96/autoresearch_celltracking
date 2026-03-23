@@ -224,7 +224,7 @@ N_FRAMES = None
 
 # Task
 PATCH = 256
-SIGMA = 5.0
+SIGMA = 3.0
 TEMPORAL = True
 JITTER = 8
 VAL_FRAC = 0.2
